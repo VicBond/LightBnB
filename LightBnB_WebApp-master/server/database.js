@@ -1,3 +1,4 @@
+/* eslint-disable camelcase */
 // const properties = require('./json/properties.json');
 // const users = require('./json/users.json');
 const { Pool } = require('pg');
@@ -63,10 +64,18 @@ exports.addUser = addUser;
  * @param {string} guest_id The id of the user.
  * @return {Promise<[{}]>} A promise to the reservations.
  */
-// const getAllReservations = function(guest_id, limit = 10) {
-//   return getAllProperties(null, 2);
-// };
-// exports.getAllReservations = getAllReservations;
+const getAllReservations = function(guest_id, limit = 10) {
+  return pool.query(`
+  SELECT *
+  FROM reservations
+  JOIN users ON users.id = reservation.guest_id
+  WHERE guest_id = $1
+  AND end_date < now()::date
+  LIMIT $2`,[guest_id, limit])
+    .then(res => res.rows ? res.rows[0] : null)
+    .catch(err => err);
+};
+exports.getAllReservations = getAllReservations;
 
 /// Properties
 
